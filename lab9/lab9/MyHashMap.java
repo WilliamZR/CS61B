@@ -26,6 +26,11 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         this.clear();
     }
 
+    public MyHashMap(int x) {
+        buckets = new ArrayMap[x];
+        this.clear();
+    }
+
     /* Removes all of the mappings from this map. */
     @Override
     public void clear() {
@@ -48,24 +53,54 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         return Math.floorMod(key.hashCode(), numBuckets);
     }
 
+    private void auto_resize(){
+        if (loadFactor()>MAX_LF){
+            MyHashMap temp_map= new MyHashMap(2* this.buckets.length);
+            for (int i=0;i< buckets.length;i++){
+                for (K key :buckets[i].keySet())
+                    temp_map.put(key,buckets[i].get(key));
+            }
+            this.buckets= temp_map.buckets;
+            this.size=temp_map.size;
+        }
+    }
+
     /* Returns the value to which the specified key is mapped, or null if this
      * map contains no mapping for the key.
      */
     @Override
     public V get(K key) {
-        throw new UnsupportedOperationException();
+        int index= hash(key);
+        ArrayMap<K,V> target=buckets[index];
+        if (target.containsKey(key)){
+            return target.get(key);
+        }else
+            return null;
     }
 
     /* Associates the specified value with the specified key in this map. */
     @Override
     public void put(K key, V value) {
-        throw new UnsupportedOperationException();
+        int index= hash(key);
+        ArrayMap<K,V> target=buckets[index];
+        if (!target.containsKey(key)){
+            size+=1;
+        }
+        target.put(key,value);
+        auto_resize();
     }
 
+    private int sum_size_after(int index){
+        ArrayMap<K,V> target=buckets[index];
+        if (index+1==buckets.length){
+            return target.size;
+        }
+        return target.size()+sum_size_after(index+1);
+    }
     /* Returns the number of key-value mappings in this map. */
     @Override
     public int size() {
-        throw new UnsupportedOperationException();
+        return this.size;
     }
 
     //////////////// EVERYTHING BELOW THIS LINE IS OPTIONAL ////////////////
